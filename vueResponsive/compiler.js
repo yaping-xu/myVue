@@ -41,19 +41,39 @@ class Compiler{
 
   textUpdate(node,value,key) {
     node.textContent = value
+
+    new Watcher (this.vm,key,(newValue)=>{
+      node.textContent = newValue
+    })
+
   }
   modelUpdate(node,value,key) {
     node.value = value
+
+    // 双向绑定
+    node.addEventListener('input',()=>{
+      this.vm[key] = node.value
+    })
+
+    new Watcher (this.vm,key,(newValue)=>{
+      node.value = newValue
+    })
+
   }
 
   // 编译文本节点，处理差值表达式
   compileText(node){
-    console.dir('compileText', node);
     const reg = /\{\{(.+?)\}\}/
     const value = node.textContent
     if(reg.test(value)){
       let key = RegExp.$1.trim()
       node.textContent = value.replace(reg, this.vm[key])
+
+      // 创建Watcher对象，数据改变更新视图
+      new Watcher (this.vm,key,(newValue)=>{
+        node.textContent = newValue
+      })
+
     }
   }
   // 判断元素属性是否为指令
